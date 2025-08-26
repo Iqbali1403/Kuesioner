@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuesioner Ekonomi Manajerial (Mode Siswa)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Konfigurasi Tailwind untuk menambahkan font Inter -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Impor Google Font - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Gaya kustom untuk menandai jawaban */
+        .correct-answer-feedback {
+            color: #10B981; /* green-500 */
+            font-weight: bold;
+        }
+        .wrong-answer-feedback {
+            color: #EF4444; /* red-500 */
+            font-weight: bold;
+        }
+        .correct-choice-highlight {
+            background-color: #D1FAE5; /* green-100 */
+            border-left: 4px solid #10B981; /* green-500 */
+        }
+        .wrong-choice-highlight {
+            background-color: #FEE2E2; /* red-100 */
+            border-left: 4px solid #EF4444; /* red-500 */
+        }
+    </style>
+</head>
+<body class="font-inter bg-gradient-to-br from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-lg shadow-xl text-center max-w-3xl w-full transform transition-all duration-300 hover:scale-105">
+        <h1 class="text-4xl font-extrabold mb-8 text-gray-800">Kuesioner Ekonomi Manajerial (Mode Siswa) 🧠</h1>
+
+        <!-- Bagian Kuesioner Dinamis (Terlihat oleh siswa) -->
+        <form id="quizForm" class="space-y-8 text-left border-t border-gray-200 pt-8 mt-8">
+            <!-- Kolom Identitas Pengisi: Nama -->
+            <div>
+                <label for="namaPengisi" class="block text-lg font-semibold mb-2 text-gray-700">Nama Anda:</label>
+                <input type="text" id="namaPengisi" name="namaPengisi" placeholder="Masukkan nama Anda"
+                       class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-normal" required>
+            </div>
+
+            <!-- Kolom Identitas Pengisi: NPM -->
+            <div>
+                <label for="npmPengisi" class="block text-lg font-semibold mb-2 text-gray-700">NPM Anda:</label>
+                <input type="text" id="npmPengisi" name="npmPengisi" placeholder="Masukkan NPM Anda"
+                       class="w-full p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-normal" required>
+            </div>
+
+            <!-- Pertanyaan-pertanyaan akan dimuat di sini secara dinamis -->
+            <div id="questionsContainer">
+                <p class="text-gray-500 text-center">Memuat pertanyaan...</p>
+            </div>
+
+            <!-- Tombol Submit Kuesioner -->
+            <button
+                type="submit"
+                id="submitQuizButton"
+                class="mt-10 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-6 rounded-lg shadow-lg transform transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-4 focus:ring-green-300 hidden"
+            >
+                Kirim Jawaban
+            </button>
+        </form>
+
+        <div id="result" class="mt-6 p-4 bg-blue-50 rounded-lg hidden">
+            <p class="text-xl font-bold text-gray-800 mb-2">Hasil Kuesioner Anda:</p>
+            <p id="scoreDisplay" class="text-lg text-gray-700"></p>
+            <p id="namaPengisiDisplay" class="text-sm text-gray-600 mt-2"></p>
+            <p id="npmPengisiDisplay" class="text-sm text-gray-600"></p>
+        </div>
+    </div>
+
+    <script>
+        // --- GANTI DENGAN URL WEB APP GOOGLE APPS SCRIPT ANDA SETELAH DI-DEPLOY ---
+        const GOOGLE_APPS_SCRIPT_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxWtlVpIO6WQb_8PVEPoRaw-TuOubp21Vb3wjWncn93s1sztGTBYyCYSQ2H3SMTb876zQ/exec';
+
+        // --- VARIABEL UNTUK DATA KUESIONER YANG SUDAH DIGENERASI ---
+        // PENTING: TEMPELKAN JSON YANG ANDA SALIN DARI MODE PENGAJAR KE SINI.
+        // CONTOH STRUKTUR:
+        // const PRE_GENERATED_QUIZ_DATA = {
+        //     "questions": [
+        //         { "question": "Pertanyaan 1...", "options": ["A", "B", "C", "D"], "correctAnswer": "A" },
+        //         { "question": "Pertanyaan 2...", "options": ["X", "Y", "Z", "W"], "correctAnswer": "Y" }
+        //     ],
+        //     "correctAnswersMap": {
+        //         "q1": "A",
+        //         "q2": "Y"
+        //     }
+        // };
+        const PRE_GENERATED_QUIZ_DATA = {
+  "questions": [
+    {
+      "question": "Menurut teks, apa peran utama ekonomi manajerial dalam konteks bisnis modern?",
+      "options": [
+        "Untuk hanya fokus pada maksimalisasi keuntungan jangka pendek tanpa mempertimbangkan faktor lain.",
+        "Sebagai jembatan antara teori ekonomi murni dan praktik bisnis, membantu manajer dalam alokasi sumber daya yang efisien.",
+        "Untuk menganalisis laporan keuangan dan data akuntansi saja.",
+        "Untuk membuat keputusan strategis tanpa mempertimbangkan ketidakpastian pasar global."
+      ],
+      "correctAnswer": "Sebagai jembatan antara teori ekonomi murni dan praktik bisnis, membantu manajer dalam alokasi sumber daya yang efisien."
+    },
+    {
+      "question": "Dalam perspektif Islam, konsep ekonomi manajerial menekankan bahwa setiap keputusan bisnis adalah bentuk apa, yang menuntut manajer untuk mengelola sumber daya dengan penuh tanggung jawab?",
+      "options": [
+        "Kapitalisasi pasar",
+        "Investasi spekulatif",
+        "Amanah dari Allah SWT",
+        "Strategi pemasaran agresif"
+      ],
+      "correctAnswer": "Amanah dari Allah SWT"
+    },
+    {
+      "question": "Selain maksimalisasi keuntungan finansial, peran manajer dalam kerangka ekonomi Islam juga diperluas untuk apa?",
+      "options": [
+        "Hanya fokus pada efisiensi produksi dan distribusi.",
+        "Menjadi khalifah Allah di bumi yang bertanggung jawab atas pengelolaan sumber daya yang diamanahkan.",
+        "Menganalisis risiko pasar tanpa pertimbangan etika atau sosial.",
+        "Membuat keputusan berdasarkan data besar (big data) semata."
+      ],
+      "correctAnswer": "Menjadi khalifah Allah di bumi yang bertanggung jawab atas pengelolaan sumber daya yang diamanahkan."
+    },
+    {
+      "question": "Bagaimana hubungan Ekonomi Manajerial dengan keuangan syariah menurut materi ajar?",
+      "options": [
+        "Keuangan syariah hanya fokus pada pembiayaan ribawi.",
+        "Manajer ekonomi akan mempertimbangkan instrumen pembiayaan seperti mudharabah, musyarakah, atau sukuk, yang didasarkan pada prinsip bagi hasil dan menghindari riba.",
+        "Tidak ada hubungan antara ekonomi manajerial dan keuangan syariah.",
+        "Keuangan syariah adalah satu-satunya sumber data akuntansi bagi ekonomi manajerial."
+      ],
+      "correctAnswer": "Manajer ekonomi akan mempertimbangkan instrumen pembiayaan seperti mudharabah, musyarakah, atau sukuk, yang didasarkan pada prinsip bagi hasil dan menghindari riba."
+    },
+    {
+      "question": "Menurut perspektif Islam, apa tujuan utama perusahaan yang melampaui sekadar maksimalisasi keuntungan?",
+      "options": [
+        "Memperbesar pangsa pasar global dan meningkatkan pendapatan semata.",
+        "Mencapai falah (kesejahteraan holistik) dan maslahah (kemaslahatan umum) bagi seluruh umat manusia dan lingkungan.",
+        "Mengurangi biaya operasional seminimal mungkin untuk efisiensi.",
+        "Mengutamakan kepentingan pemegang saham di atas segalanya tanpa mempertimbangkan dampak sosial."
+      ],
+      "correctAnswer": "Mencapai falah (kesejahteraan holistik) dan maslahah (kemaslahatan umum) bagi seluruh umat manusia dan lingkungan."
+    }
+  ],
+  "correctAnswersMap": {
+    "q1": "Sebagai jembatan antara teori ekonomi murni dan praktik bisnis, membantu manajer dalam alokasi sumber daya yang efisien.",
+    "q2": "Amanah dari Allah SWT",
+    "q3": "Menjadi khalifah Allah di bumi yang bertanggung jawab atas pengelolaan sumber daya yang diamanahkan.",
+    "q4": "Manajer ekonomi akan mempertimbangkan instrumen pembiayaan seperti mudharabah, musyarakah, atau sukuk, yang didasarkan pada prinsip bagi hasil dan menghindari riba.",
+    "q5": "Mencapai falah (kesejahteraan holistik) dan maslahah (kemaslahatan umum) bagi seluruh umat manusia dan lingkungan."
+  }
+};
+        // --- AKHIR VARIABEL DATA KUESIONER PRE-GENERATED ---
+
+
+        // Local Storage Keys - Hanya untuk menyimpan DRAFT jawaban siswa jika mereka belum submit
+        const LS_USER_ANSWERS_UNSUBMITTED = 'userAnswersUnsubmitted';
+
+        // Element References
+        const questionsContainer = document.getElementById('questionsContainer');
+        const quizForm = document.getElementById('quizForm');
+        const submitQuizButton = document.getElementById('submitQuizButton');
+        const resultDiv = document.getElementById('result');
+        const scoreDisplay = document.getElementById('scoreDisplay');
+        const namaPengisiInput = document.getElementById('namaPengisi');
+        const npmPengisiInput = document.getElementById('npmPengisi');
+        const namaPengisiDisplay = document.getElementById('namaPengisiDisplay');
+        const npmPengisiDisplay = document.getElementById('npmPengisiDisplay');
+
+        let generatedQuestions = []; // Akan diisi dari PRE_GENERATED_QUIZ_DATA
+        let generatedCorrectAnswers = {}; // Akan diisi dari PRE_GENERATED_QUIZ_DATA
+
+        // --- Helper Function: Save/Load to Local Storage (Hanya untuk draft jawaban siswa) ---
+        function saveToLocalStorage(key, data) {
+            try {
+                localStorage.setItem(key, JSON.stringify(data));
+            } catch (e) {
+                console.error("Error saving to local storage:", key, e);
+            }
+        }
+        function loadFromLocalStorage(key) {
+            try {
+                const data = localStorage.getItem(key);
+                return data ? JSON.parse(data) : null;
+            } catch (e) {
+                console.error("Error loading from local storage:", key, e);
+                return null;
+            }
+        }
+        
+        // --- Fungsi untuk merender pertanyaan kuesioner ke HTML ---
+        function renderQuiz(questions, userAnswers = {}, disableInputs = false) {
+            questionsContainer.innerHTML = '';
+
+            if (questions.length === 0) {
+                questionsContainer.innerHTML = '<p class="text-gray-500 text-center">Tidak ada pertanyaan yang tersedia. Mohon hubungi pengajar Anda untuk mendapatkan kuesioner.</p>';
+                submitQuizButton.classList.add('hidden'); // Sembunyikan tombol submit jika tidak ada pertanyaan
+                return;
+            }
+
+            questions.forEach((q, index) => {
+                const questionNumber = index + 1;
+                const questionId = `q${questionNumber}`;
+
+                let optionsHtml = '';
+                q.options.forEach((option, optIndex) => {
+                    const isChecked = userAnswers[questionId] === option ? 'checked' : '';
+                    const isDisabled = disableInputs ? 'disabled' : '';
+                    optionsHtml += `
+                        <label class="block cursor-pointer p-2 rounded-md hover:bg-gray-100 transition-colors ${isDisabled ? 'opacity-70 cursor-not-allowed' : ''}">
+                            <input type="radio" name="${questionId}" value="${option}" class="mr-2 text-blue-600 focus:ring-blue-500" ${isChecked} ${isDisabled}> ${option}
+                        </label>
+                    `;
+                });
+
+                const questionHtml = `
+                    <div id="question-${questionId}">
+                        <p class="text-lg font-semibold mb-3 text-gray-700">${questionNumber}. ${q.question}</p>
+                        <div class="space-y-2">
+                            ${optionsHtml}
+                        </div>
+                        <p id="feedback-${questionId}" class="text-sm mt-1"></p>
+                    </div>
+                `;
+                questionsContainer.innerHTML += questionHtml;
+            });
+
+            resultDiv.classList.add('hidden');
+        }
+
+        // --- Fungsi untuk menampilkan hasil kuesioner ---
+        function displayQuizResult(resultData, userAnswers) {
+            resultDiv.classList.remove('hidden');
+            scoreDisplay.innerHTML = `Anda menjawab ${resultData.score} dari ${resultData.totalQuestions} pertanyaan dengan benar.`;
+            namaPengisiDisplay.innerHTML = `Kuesioner diisi oleh: <strong>${resultData.nama}</strong>`;
+            npmPengisiDisplay.innerHTML = `NPM: <strong>${resultData.npm}</strong>`;
+
+            // Tampilkan feedback untuk setiap pertanyaan
+            generatedQuestions.forEach((q, index) => {
+                const questionNumber = index + 1;
+                const questionId = `q${questionNumber}`;
+                const userAnswer = userAnswers[questionId];
+                const correctAnswer = generatedCorrectAnswers[questionId];
+                const isCorrect = (correctAnswer === userAnswer);
+                
+                const feedbackElement = document.getElementById(`feedback-${questionId}`);
+
+                if (feedbackElement) {
+                    if (isCorrect) {
+                        feedbackElement.innerHTML = '&#10004; Jawaban Anda benar!';
+                        feedbackElement.classList.remove('wrong-answer-feedback');
+                        feedbackElement.classList.add('correct-answer-feedback');
+                    } else {
+                        const correctRadio = quizForm.querySelector(`input[name="${questionId}"][value="${correctAnswer}"]`);
+                        let correctLabelText = '';
+                        if (correctRadio) {
+                           correctLabelText = correctRadio.closest('label').innerText;
+                        } else {
+                           correctLabelText = 'Jawaban tidak ditemukan';
+                        }
+                        
+                        feedbackElement.innerHTML = `&#10008; Jawaban Anda salah. Jawaban yang benar adalah: <strong>${correctLabelText}</strong>`;
+                        feedbackElement.classList.remove('wrong-answer-feedback');
+                        feedbackElement.classList.add('wrong-answer-feedback');
+                    }
+                }
+
+                const radioButtonsForQuestion = quizForm.querySelectorAll(`input[name="${questionId}"]`);
+                radioButtonsForQuestion.forEach(radio => {
+                    const label = radio.closest('label');
+                    label.classList.remove('correct-choice-highlight', 'wrong-choice-highlight');
+                    
+                    if (radio.value === correctAnswer) {
+                        label.classList.add('correct-choice-highlight');
+                    } else if (radio.checked && !isCorrect) {
+                        label.classList.add('wrong-choice-highlight');
+                    }
+                });
+            });
+        }
+
+        // --- Fungsi untuk menonaktifkan semua input form (setelah submit) ---
+        function disableForm() {
+            console.log("disableForm dipanggil.");
+            namaPengisiInput.disabled = true;
+            namaPengisiInput.classList.add('opacity-70', 'cursor-not-allowed');
+
+            npmPengisiInput.disabled = true;
+            npmPengisiInput.classList.add('opacity-70', 'cursor-not-allowed');
+
+            const radioButtons = quizForm.querySelectorAll('input[type="radio"]');
+            radioButtons.forEach(radio => {
+                radio.disabled = true;
+                radio.closest('label').classList.add('opacity-70', 'cursor-not-allowed');
+            });
+
+            submitQuizButton.disabled = true;
+            submitQuizButton.classList.remove('hover:bg-green-700', 'hover:scale-105');
+            submitQuizButton.classList.add('bg-gray-400', 'cursor-not-allowed');
+        }
+
+        // --- Event Listener untuk submit kuesioner (logika scoring, feedback, dan pengiriman data) ---
+        quizForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            if (!namaPengisiInput.value.trim()) {
+                alert('Nama Anda harus diisi sebelum mengirim kuesioner.');
+                namaPengisiInput.focus();
+                return;
+            }
+            if (!npmPengisiInput.value.trim()) {
+                alert('NPM Anda harus diisi sebelum mengirim kuesioner.');
+                npmPengisiInput.focus();
+                return;
+            }
+
+            const totalGeneratedQuestions = Object.keys(generatedCorrectAnswers).length;
+            if (totalGeneratedQuestions === 0) {
+                 alert('Tidak ada pertanyaan yang tersedia. Mohon hubungi pengajar Anda.');
+                 return;
+            }
+
+            // Kumpulkan jawaban user
+            const userAnswers = {};
+            let allAnswered = true;
+            for (let i = 1; i <= totalGeneratedQuestions; i++) {
+                const questionName = `q${i}`;
+                const selectedOption = quizForm.querySelector(`input[name="${questionName}"]:checked`);
+                if (!selectedOption) {
+                    allAnswered = false;
+                    alert(`Mohon jawab pertanyaan nomor ${i}.`);
+                    document.getElementById(`question-${questionName}`).scrollIntoView({ behavior: 'smooth' });
+                    return;
+                }
+                userAnswers[questionName] = selectedOption.value;
+            }
+            if (!allAnswered) return;
+
+            let score = 0;
+            const pengisiNama = namaPengisiInput.value.trim();
+            const pengisiNPM = npmPengisiInput.value.trim();
+
+            for (const questionId in generatedCorrectAnswers) {
+                if (generatedCorrectAnswers[questionId] === userAnswers[questionId]) {
+                    score++;
+                }
+            }
+            
+            const quizResult = {
+                timestamp: new Date().toISOString(),
+                nama: pengisiNama,
+                npm: pengisiNPM,
+                score: score,
+                totalQuestions: totalGeneratedQuestions,
+                generatedQuestions: generatedQuestions, // Kirim juga pertanyaan yang digenerate
+                userAnswers: userAnswers,
+                correctAnswers: generatedCorrectAnswers // Kirim jawaban benar
+            };
+
+            // --- Kirim hasil ke Google Apps Script ---
+            if (GOOGLE_APPS_SCRIPT_WEB_APP_URL === 'URL_WEB_APP_GOOGLE_APPS_SCRIPT_ANDA' || !GOOGLE_APPS_SCRIPT_WEB_APP_URL) {
+                alert('Peringatan: URL Google Apps Script belum dikonfigurasi. Hasil tidak akan disimpan di Google Sheet. Silakan ganti "URL_WEB_APP_GOOGLE_APPS_SCRIPT_ANDA" dengan URL Web App Anda.');
+            } else {
+                try {
+                    const response = await fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: new URLSearchParams({
+                            action: 'submitQuiz',
+                            data: JSON.stringify(quizResult)
+                        })
+                    });
+                    alert('Hasil kuesioner berhasil dikirim!');
+                    localStorage.removeItem(LS_USER_ANSWERS_UNSUBMITTED); // Hapus draft setelah submit
+
+                } catch (error) {
+                    console.error("Error submitting quiz to Google Apps Script:", error);
+                    alert(`Gagal mengirim hasil kuesioner: ${error.message}. Silakan coba lagi atau hubungi pengajar.`);
+                }
+            }
+            // --- Akhir pengiriman ke Google Apps Script ---
+
+            displayQuizResult(quizResult, userAnswers); // Tampilkan hasil di UI lokal
+            disableForm(); // Menonaktifkan form
+        });
+
+        // --- Tambahkan event listener untuk menyimpan draft jawaban user ---
+        quizForm.addEventListener('change', function() {
+            const totalQuestions = generatedQuestions.length;
+            if (totalQuestions === 0) return;
+
+            const userAnswers = {
+                namaPengisi: namaPengisiInput.value.trim(),
+                npmPengisi: npmPengisiInput.value.trim()
+            };
+            for (let i = 1; i <= totalQuestions; i++) {
+                const questionName = `q${i}`;
+                const selectedOption = quizForm.querySelector(`input[name="${questionName}"]:checked`);
+                if (selectedOption) {
+                    userAnswers[questionName] = selectedOption.value;
+                }
+            }
+            saveToLocalStorage(LS_USER_ANSWERS_UNSUBMITTED, userAnswers);
+        });
+
+
+        // --- Fungsi inisialisasi saat halaman dimuat ---
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOMContentLoaded fired. PRE_GENERATED_QUIZ_DATA.questions length:", PRE_GENERATED_QUIZ_DATA.questions.length);
+
+            if (PRE_GENERATED_QUIZ_DATA.questions && PRE_GENERATED_QUIZ_DATA.questions.length > 0) {
+                console.log("Initializing in Student Mode (PRE_GENERATED_QUIZ_DATA is pre-filled).");
+                generatedQuestions = PRE_GENERATED_QUIZ_DATA.questions;
+                generatedCorrectAnswers = PRE_GENERATED_QUIZ_DATA.correctAnswersMap;
+                
+                const savedUserAnswers = loadFromLocalStorage(LS_USER_ANSWERS_UNSUBMITTED);
+
+                renderQuiz(generatedQuestions, savedUserAnswers || {}); // Render kuesionernya
+                submitQuizButton.classList.remove('hidden'); // Tampilkan tombol submit
+
+            } else {
+                console.log("PRE_GENERATED_QUIZ_DATA is empty. Displaying message for no questions.");
+                questionsContainer.innerHTML = '<p class="text-gray-500 text-center">Tidak ada pertanyaan yang tersedia. Mohon hubungi pengajar Anda untuk mendapatkan kuesioner.</p>';
+                submitQuizButton.classList.add('hidden'); // Sembunyikan tombol submit jika tidak ada pertanyaan
+            }
+        });
+    </script>
+</body>
+</html>
